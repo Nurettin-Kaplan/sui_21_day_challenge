@@ -20,5 +20,15 @@ module challenge::day_02 {
     // fun test_sum() {
     //     // Your code here
     // }
+
+    public fun sum(x: u64, y: u64): u64{
+        x + y
+    }
+
+    #[test]
+    fun test_sum_operation() {
+        let result: u64 = sum(4, 5);
+        assert_eq!(result, 9);
+    }
 }
 
