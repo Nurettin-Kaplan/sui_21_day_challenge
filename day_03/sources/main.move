@@ -21,5 +21,18 @@ module challenge::day_03 {
     // public fun new_habit(name: vector<u8>): Habit {
     //     // Your code here
     // }
+
+    public struct Habit has copy, drop {
+        name: vector<u8>,
+        completed: bool,
+    }
+
+    public fun new_habit(name: vector<u8>): Habit {
+        Habit {
+            name,
+            completed: false,
+        }
+    }
+
 }
 
