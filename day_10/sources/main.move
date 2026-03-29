@@ -34,6 +34,18 @@ module challenge::day_10 {
         task.status == TaskStatus::Open
     }
 
+    public fun complete_task(task: &mut Task) {
+        task.status = TaskStatus::Completed;
+    }
+
+    public fun has_valid_reward(task: &Task): bool {
+        internal_helper(task)
+    }
+
+    fun internal_helper(task: &Task): bool {
+        task.reward <= 100
+    }
+
     // TODO: Write a public function 'complete_task' that:
     // - Takes task: &mut Task
     // - Sets task.status = TaskStatus::Completed
