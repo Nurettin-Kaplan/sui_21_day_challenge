@@ -10,6 +10,8 @@
 module challenge::day_07 {
     use std::vector;
     use std::string::{Self, String};
+    #[test_only]
+    use std::unit_test::assert_eq;
 
     // Copy from day_06: Habit struct with String
     public struct Habit has copy, drop {
@@ -49,6 +51,30 @@ module challenge::day_07 {
             let habit = vector::borrow_mut(&mut list.habits, index);
             habit.completed = true;
         }
+    }
+
+    #[test]
+    public fun test_adding_habits() {
+        let mut habitList = empty_list();
+
+        add_habit(&mut habitList, make_habit(b"Read a book"));
+        add_habit(&mut habitList, make_habit(b"Wake up early"));
+
+        assert!(vector::length(&habitList.habits) == 2)
+    }
+
+    #[test]
+    public fun test_completed_habits(){
+        let mut habitList = empty_list();
+
+        add_habit(&mut habitList, make_habit(b"Read a book"));
+        add_habit(&mut habitList, make_habit(b"Wake up early"));
+
+        complete_habit(&mut habitList, 0);
+
+        let habit = vector::borrow(&habitList.habits, 0);
+
+        assert_eq!(habit.completed, true)
     }
 
     // Note: assert! is a built-in macro in Move 2024 - no import needed!
