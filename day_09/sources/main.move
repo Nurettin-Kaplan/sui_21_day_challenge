@@ -8,6 +8,29 @@
 module challenge::day_09 {
     use std::string::String;
 
+    public struct Task has copy, drop {
+        title: String,
+        reward: u64,
+        status: TaskStatus,
+    }
+
+    public fun new_task(title: String, reward: u64): Task {
+        Task {
+            title,
+            reward,
+            status: TaskStatus::Open,
+        }
+    }
+
+    public enum TaskStatus has copy, drop {
+        Open,
+        Completed,
+    }
+
+    public fun is_open(task: &Task): bool {
+        task.status == TaskStatus::Open
+    }
+
     // Copy Task struct from day_08, but we'll update it
 
     // TODO: Define an enum called 'TaskStatus' with two variants:
