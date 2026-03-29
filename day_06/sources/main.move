@@ -13,11 +13,11 @@ module challenge::day_06 {
 
     // Copy from day_05: Habit struct (will be updated to use String)
     public struct Habit has copy, drop {
-        name: vector<u8>,  // TODO: Change this to String
+        name: String,  // TODO: Change this to String
         completed: bool,
     }
 
-    public fun new_habit(name: vector<u8>): Habit {
+    public fun new_habit(name: String): Habit {
         Habit {
             name,
             completed: false,
@@ -44,6 +44,15 @@ module challenge::day_06 {
         if (index < len) {
             let habit = vector::borrow_mut(&mut list.habits, index);
             habit.completed = true;
+        }
+    }
+
+    public fun make_habit(name_bytes: vector<u8>): Habit {
+        let name = string::utf8(name_bytes);
+        
+        Habit {
+            name,
+            completed: false,
         }
     }
 
