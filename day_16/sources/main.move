@@ -10,6 +10,9 @@
 
 module challenge::day_16 {
 
+    use std::vector; // Dünden kalan vektör işlemleri için
+    use sui::object::{Self, UID}; // Benzersiz kimlik ve object::new için
+    use sui::tx_context::TxContext; // İşlem bağlamı (ctx) için
 
     // Copy from day_15: FarmCounters struct
     const MAX_PLOTS: u64 = 20;
@@ -72,6 +75,18 @@ module challenge::day_16 {
         // Remove the plot from the vector
         vector::remove(&mut counters.plots, found_index);
         counters.harvested = counters.harvested + 1;
+    }
+
+    public struct Farm has key {
+        id: UID,
+        counters: FarmCounters,
+    }
+
+    fun new_farm(ctx: &mut TxContext): Farm {
+        Farm {
+            id: object::new(ctx),
+            counters: new_counters(),
+        }
     }
 
     // TODO: Define a struct called 'Farm' with:
