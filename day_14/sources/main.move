@@ -82,6 +82,45 @@ module challenge::day_14 {
         count
     }
 
+    #[test]
+    fun test_create_board_and_add_task() {
+        let mut board = new_board(@0x123);
+        let task = new_task(string::utf8(b"Drink a glass of water"), 30);
+        
+        add_task(&mut board, task);
+
+        assert!(vector::length(&board.tasks) == 1);
+    }
+
+    #[test]
+    fun test_complete_task() {
+        let mut board = new_board(@0x124);
+        let mut task1 = new_task(string::utf8(b"Turn on your computer."), 25);
+        let mut task2 = new_task(string::utf8(b"Clean your desk."), 40);
+
+        complete_task(&mut task2);
+
+        add_task(&mut board, task1);
+        add_task(&mut board, task2);
+
+        assert!(completed_count(&board) == 1);
+    }
+
+    #[test]
+    fun test_total_reward() {
+        let mut board = new_board(@0x125);
+        let mut task1 = new_task(string::utf8(b"Eat something."), 100);
+        let mut task2 = new_task(string::utf8(b"Wash your hands."), 200);
+
+        complete_task(&mut task1);
+        complete_task(&mut task2);
+
+        add_task(&mut board, task1);
+        add_task(&mut board, task2);
+
+        assert!(total_reward(&board) == 300);
+    }
+
     // Note: assert! is a built-in macro in Move 2024 - no import needed!
 
     // TODO: Write at least 3 tests:
