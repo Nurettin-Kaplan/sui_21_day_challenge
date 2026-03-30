@@ -48,6 +48,23 @@ module challenge::day_12 {
         vector::push_back(&mut board.tasks, task);
     }
 
+    public fun find_task_by_title(board: &TaskBoard, title: String): Option<u64> {
+        let mut i = 0;
+        let mut len = vector::length(&board.tasks);
+        
+        while(i < len) {
+            let mut task = vector::borrow(&board.tasks, i);
+
+            if(*&title == *&task.title) {
+                return option::some(i)
+            };
+            
+            i = i + 1;
+        };
+
+        option::none()
+    }
+
     // TODO: Write a function 'find_task_by_title' that:
     // - Takes board: &TaskBoard and title: &String
     // - Returns Option<u64> (the index if found, None if not found)
