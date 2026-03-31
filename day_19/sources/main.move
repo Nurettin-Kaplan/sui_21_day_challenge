@@ -11,6 +11,9 @@
 
 module challenge::day_19 {
    
+    use sui::object::{Self, UID};
+    use sui::transfer;
+    use sui::tx_context::TxContext;
 
     const MAX_PLOTS: u64 = 20;
     const E_PLOT_NOT_FOUND: u64 = 1;
@@ -105,6 +108,27 @@ module challenge::day_19 {
 
     entry fun harvest_from_farm_entry(farm: &mut Farm, plotId: u8) {
         harvest_from_farm(farm, plotId);
+    }
+
+    public fun total_planted(farm: &Farm): u64 {
+        farm.counters.planted
+    }
+
+    public fun total_harvested(farm: &Farm): u64 {
+        farm.counters.harvested
+    }
+
+    #[test]
+    fun test_total_planted() {
+
+        let mut ctx = sui::tx_context::dummy();
+        let mut farm = new_farm(&mut ctx);
+
+        plant_on_farm(&mut farm, 1);
+
+        assert!(total_planted(&farm) == 1, 0);
+
+        sui::transfer::share_object(farm);
     }
 
     // TODO: Write a function 'total_planted' that:
