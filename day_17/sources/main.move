@@ -9,8 +9,12 @@
 /// day_16/sources/solution.move if needed (note: plotId functionality has been added)
 
 module challenge::day_17 {
-   
 
+    use std::vector; // Dünden kalan vektör işlemleri için
+    use sui::object::{Self, UID}; // Benzersiz kimlik ve object::new için
+    use sui::tx_context::TxContext; // İşlem bağlamı (ctx) için
+    use sui::transfer;
+   
     // Copy from day_16: FarmCounters and Farm
     const MAX_PLOTS: u64 = 20;
     const E_PLOT_NOT_FOUND: u64 = 1;
@@ -84,6 +88,19 @@ module challenge::day_17 {
             id: object::new(ctx),
             counters: new_counters(),
         }
+    }
+
+    entry fun create_farm(ctx: &mut TxContext) {
+        let farm = new_farm(ctx);
+        transfer::share_object(farm);
+    }
+
+    fun plant_on_farm(farm: &mut Farm, plotId: u8) {
+        plant(&mut farm.counters, plotId);
+    }
+
+    fun harvest_from_farm(farm: &mut Farm, plotId: u8) {
+        harvest(&mut farm.counters, plotId);
     }
 
     // TODO: Write an entry function 'create_farm' that:
