@@ -8,12 +8,20 @@
 /// Note: You can copy code from day_20/sources/solution.move if needed
 
 module challenge::day_21 {
-    use sui::event;
 
     // Note: test_scenario is available in Sui framework for testing
     // You'll need to import it when writing tests: use sui::test_scenario;
 
     // Copy from day_20: All structs and functions
+
+    use sui::object::{Self, UID};
+    use sui::transfer;
+    use sui::tx_context::TxContext;
+    use sui::event;
+    #[test_only]
+    use sui::test_scenario;
+    #[test_only]
+    use std::unit_test::assert_eq;
     
     const MAX_PLOTS: u64 = 20;
     const E_PLOT_NOT_FOUND: u64 = 1;
@@ -126,6 +134,184 @@ module challenge::day_21 {
 
     entry fun harvest_from_farm_entry(farm: &mut Farm, plotId: u8) {
         harvest_from_farm(farm, plotId);
+    }
+
+    #[test]
+    fun test_create_farm() {
+        let mut scenario = test_scenario::begin(@0x1);
+
+        {
+            create_farm(test_scenario::ctx(&mut scenario));
+        };
+
+        test_scenario::next_tx(&mut scenario, @0x1);
+
+        {
+            let farm = test_scenario::take_shared<Farm>(&scenario);
+            assert_eq!(total_planted(&farm), 0);
+            assert_eq!(total_harvested(&farm), 0);
+            test_scenario::return_shared(farm);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_planting_increases_counter() {
+        let mut scenario = test_scenario::begin(@0x1);
+
+        {
+            create_farm(test_scenario::ctx(&mut scenario));
+        };
+
+        test_scenario::next_tx(&mut scenario, @0x1);
+
+        {
+            let mut farm = test_scenario::take_shared<Farm>(&scenario);
+            plant_on_farm(&mut farm, 1);
+            assert_eq!(total_planted(&farm), 1);
+            assert_eq!(total_harvested(&farm), 0);
+            test_scenario::return_shared(farm);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_harvesting_increases_counter() {
+        let mut scenario = test_scenario::begin(@0x1);
+
+        {
+            create_farm(test_scenario::ctx(&mut scenario));
+        };
+
+        test_scenario::next_tx(&mut scenario, @0x1);
+
+        {
+            let mut farm = test_scenario::take_shared<Farm>(&scenario);
+            
+            plant_on_farm(&mut farm, 1);
+            harvest_from_farm(&mut farm, 1);
+
+            assert_eq!(total_planted(&farm), 1);
+            assert_eq!(total_harvested(&farm), 1);
+            test_scenario::return_shared(farm);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_multiple_operations() {
+        let mut scenario = test_scenario::begin(@0x1);
+
+        {
+            create_farm(test_scenario::ctx(&mut scenario));
+        };
+
+        test_scenario::next_tx(&mut scenario, @0x1);
+
+        {
+            let mut farm = test_scenario::take_shared<Farm>(&scenario);
+            
+            plant_on_farm(&mut farm, 3);
+            plant_on_farm(&mut farm, 5);
+            plant_on_farm(&mut farm, 18);
+
+            harvest_from_farm(&mut farm, 5);
+
+            assert_eq!(total_planted(&farm), 3);
+            assert_eq!(total_harvested(&farm), 1);
+            test_scenario::return_shared(farm);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = E_INVALID_PLOT_ID)]
+    fun test_invalid_plot_id() {
+        let mut scenario = test_scenario::begin(@0x1);
+
+        {
+            create_farm(test_scenario::ctx(&mut scenario));
+        };
+
+        test_scenario::next_tx(&mut scenario, @0x1);
+
+        {
+            let mut farm = test_scenario::take_shared<Farm>(&scenario);
+            
+            plant_on_farm(&mut farm, 0);
+
+            test_scenario::return_shared(farm);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = E_PLOT_ALREADY_EXISTS)]
+    fun test_duplicate_plot() {
+        let mut scenario = test_scenario::begin(@0x1);
+
+        {
+            create_farm(test_scenario::ctx(&mut scenario));
+        };
+
+        test_scenario::next_tx(&mut scenario, @0x1);
+
+        {
+            let mut farm = test_scenario::take_shared<Farm>(&scenario);
+            
+            plant_on_farm(&mut farm, 1);
+            plant_on_farm(&mut farm, 1);
+
+            test_scenario::return_shared(farm);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = E_PLOT_LIMIT_EXCEEDED)]
+    fun test_plot_limit() {
+        let mut scenario = test_scenario::begin(@0x1);
+
+        {
+            create_farm(test_scenario::ctx(&mut scenario));
+        };
+
+        test_scenario::next_tx(&mut scenario, @0x1);
+
+        {
+            let mut farm = test_scenario::take_shared<Farm>(&scenario);
+            
+            let mut i = 1;
+            while (i <= 20) {
+                plant_on_farm(&mut farm, (i as u8));
+                i = i + 1;
+            };
+
+
+            plant_on_farm(&mut farm, 1);
+            test_scenario::return_shared(farm);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = E_PLOT_NOT_FOUND)]
+    fun test_harvest_nonexistent_plot() {
+        let mut scenario = test_scenario::begin(@0x1);
+
+        {
+            create_farm(test_scenario::ctx(&mut scenario));
+        };
+
+        test_scenario::next_tx(&mut scenario, @0x1);
+
+        {
+            let mut farm = test_scenario::take_shared<Farm>(&scenario);
+            
+            harvest_from_farm(&mut farm, 5);
+            test_scenario::return_shared(farm);
+        };
+        test_scenario::end(scenario);
     }
 
     // TODO: Write comprehensive tests:
